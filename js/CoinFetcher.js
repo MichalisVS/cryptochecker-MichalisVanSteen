@@ -1,6 +1,6 @@
 'use strict';
 
-const API = "";
+const API = "http://api.coinlayer.com/api/live?access_key=2f5eb507c8cdd0cdbb1f921f34f23e28";
 
 class CoinFetcher{
     constructor() {
@@ -24,19 +24,30 @@ class CoinFetcher{
 
     checkRates(newRates) {
         for(const coin in  newRates) {
-            console.log(coin, newRates[coin]);
+            //console.log(coin, newRates[coin]);
             if(this.rates[coin]) {
                 //Check if new rate is lower then old one
                 if(newRates[coin] < this.rates[coin]) {
                     console.log('This is going down:', coin);
                     //Notify the watchers
+                    this.notifyWatchers(coin, newRates[coin]);
                 }
             }
         }
+        this.rates = newRates;
+    }
+
+    notifyWatchers(coin, rate) {
+        this.watchers.foreach(watcher => {
+            if(watcher.coin == coin) {
+                watcher.notify(coin, rate);
+            }
+        });
     }
 
     subscribe(watcher) {
-        console.log(watcher);
+        this.watchers.push(watcher);
+        console.log(this.watchers);
     }
 }
 
